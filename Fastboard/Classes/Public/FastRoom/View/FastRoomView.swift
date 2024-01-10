@@ -48,7 +48,6 @@ public class FastRoomView: UIView, FastPanelControl {
         var height = width / Fastboard.globalFastboardRatio
         if height > bounds.height {
             height = bounds.height
-            width = Fastboard.globalFastboardRatio * height
         }
         let x = (bounds.width - width) / 2
         let y = (bounds.height - height) / 2
@@ -60,7 +59,15 @@ public class FastRoomView: UIView, FastPanelControl {
     
     func setupWhiteboardView() {
         whiteboardView = WhiteBoardView()
+        whiteboardView.frame = self.bounds
         addSubview(whiteboardView)
+        whiteboardView.translatesAutoresizingMaskIntoConstraints = false
+        if #available(iOS 11.0, *) {
+            whiteboardView.trailingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.trailingAnchor).isActive = true
+            whiteboardView.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor).isActive = true
+        }
+        whiteboardView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        whiteboardView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -5).isActive = true
     }
     
     @objc
