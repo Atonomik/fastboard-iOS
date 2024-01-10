@@ -73,6 +73,16 @@ public class CompactFastRoomOverlay: NSObject, FastRoomOverlay, FastPanelDelegat
     var allConstraints: [NSLayoutConstraint] = []
     var operationLeftConstraint: NSLayoutConstraint?
     var operationRightConstraint: NSLayoutConstraint?
+    var operationsTopConstraint: NSLayoutConstraint?
+    
+    lazy var operationsStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.distribution = .fill
+        stackView.alignment = .center
+        stackView.spacing = 5
+        return stackView
+    }()
     
     public func setupWith(room: WhiteRoom, fastboardView: FastRoomView, direction: OperationBarDirection) {
         let colorView = colorAndStrokePanel.setup(room: room)
@@ -82,24 +92,29 @@ public class CompactFastRoomOverlay: NSObject, FastRoomOverlay, FastPanelDelegat
                                                direction: .horizontal)
         let sceneView = scenePanel.setup(room: room,
                                          direction: .horizontal)
+        
+        [colorView, operationView].forEach {
+                $0.translatesAutoresizingMaskIntoConstraints = false
+                $0.heightAnchor.constraint(equalToConstant: 50).isActive = true
+            operationsStackView.addArrangedSubview($0)
+        }
+        
         let opViews = [
-            colorView,
-            operationView,
+            operationsStackView,
             deleteView,
             undoRedoView,
             sceneView
         ]
+        
         opViews.forEach {
             fastboardView.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
         let margin: CGFloat = 8
-        operationLeftConstraint = operationView.leftAnchor.constraint(equalTo: fastboardView.whiteboardView.leftAnchor, constant: margin)
-        operationRightConstraint = operationView.rightAnchor.constraint(equalTo: fastboardView.whiteboardView.rightAnchor, constant: -margin)
-        let operationC0 = operationView.centerYAnchor.constraint(equalTo: fastboardView.whiteboardView.centerYAnchor)
-        let colorC0 = colorView.rightAnchor.constraint(equalTo: operationView.rightAnchor)
-        let colorC1 = colorView.bottomAnchor.constraint(equalTo: operationView.topAnchor, constant: -margin)
+        operationLeftConstraint = operationsStackView.leftAnchor.constraint(equalTo: fastboardView.whiteboardView.leftAnchor, constant: margin)
+        operationRightConstraint = operationsStackView.rightAnchor.constraint(equalTo: fastboardView.whiteboardView.rightAnchor, constant: -margin)
+        operationsTopConstraint = operationsStackView.topAnchor.constraint(equalTo: fastboardView.whiteboardView.topAnchor, constant: margin)
         let deleteC0 = deleteView.rightAnchor.constraint(equalTo: colorView.rightAnchor)
         let deleteC1 = deleteView.bottomAnchor.constraint(equalTo: colorView.bottomAnchor)
         let undoRedoC0 = undoRedoView.leftAnchor.constraint(equalTo: fastboardView.whiteboardView.leftAnchor, constant: margin)
@@ -110,9 +125,7 @@ public class CompactFastRoomOverlay: NSObject, FastRoomOverlay, FastPanelDelegat
         let generatedConstraints = [
             operationLeftConstraint!,
             operationRightConstraint!,
-            operationC0,
-            colorC0,
-            colorC1,
+            operationsTopConstraint!,
             deleteC0,
             deleteC1,
             undoRedoC0,

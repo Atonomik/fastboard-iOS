@@ -41,8 +41,9 @@ extension WhiteApplianceShapeTypeKey: CaseIterable {
 
 class ViewController: UIViewController {
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        .all
+        [.landscape, .portrait]
     }
+    
     
     var fastRoom: FastRoom!
     
@@ -55,7 +56,6 @@ class ViewController: UIViewController {
     func setupViews() {
         view.backgroundColor = .gray
         setupFastboard()
-        setupBottomTools()
         setupMediaTools()
     }
     
@@ -81,40 +81,20 @@ class ViewController: UIViewController {
         let config: FastRoomConfiguration = FastRoomConfiguration(appIdentifier: RoomInfo.APPID.value,
                                            roomUUID: RoomInfo.ROOMUUID.value,
                                            roomToken: RoomInfo.ROOMTOKEN.value,
-                                           region: .CN,
-                                           userUID: "some-unique-id")
+                                           region: .US,
+                                           userUID: "ahmet")
         config.customOverlay = custom
         let fastRoom = Fastboard.createFastRoom(withFastRoomConfig: config)
         fastRoom.delegate = self
         let fastRoomView = fastRoom.view
-        view.autoresizesSubviews = true
         view.addSubview(fastRoomView)
-        let leftGuide = UILayoutGuide()
-        let rightGuide = UILayoutGuide()
-        view.addLayoutGuide(leftGuide)
-        view.addLayoutGuide(rightGuide)
-        leftGuide.snp.makeConstraints { make in
-            make.left.top.bottom.equalToSuperview()
-        }
-        rightGuide.snp.makeConstraints { make in
-            make.right.top.bottom.equalToSuperview()
-            make.left.equalTo(fastRoomView.snp.right)
-            make.width.equalTo(leftGuide)
-            make.width.greaterThanOrEqualTo(0)
-        }
-        fastRoomView.snp.makeConstraints { make in
-            make.left.equalTo(leftGuide.snp.right)
-            if #available(iOS 11.0, *) {
-                make.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(44)
-            } else {
-                make.top.equalToSuperview().inset(44)
-            }
-            make.width.greaterThanOrEqualTo(144)
-            make.height.lessThanOrEqualToSuperview().inset(90)
-            make.height.equalTo(fastRoomView.snp.width).multipliedBy(1 / Fastboard.globalFastboardRatio)
-        }
-        fastRoomView.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        fastRoomView.frame = view.bounds
         
+        fastRoomView.translatesAutoresizingMaskIntoConstraints = false
+        fastRoomView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
+        fastRoomView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
+        fastRoomView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
+        fastRoomView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
         let activity: UIActivityIndicatorView
         if #available(iOS 13.0, *) {
             activity = UIActivityIndicatorView(style: .medium)
@@ -124,11 +104,9 @@ class ViewController: UIViewController {
         fastRoomView.addSubview(activity)
         activity.snp.makeConstraints { $0.center.equalToSuperview() }
         activity.startAnimating()
-        exampleControlView.isHidden = true
-        mediaControlView.isHidden = true
+        mediaControlView.isHidden = false
         fastRoom.joinRoom { _ in
             activity.stopAnimating()
-            self.exampleControlView.isHidden = false
             self.mediaControlView.isHidden = false
         }
         self.fastRoom = fastRoom
@@ -143,31 +121,15 @@ class ViewController: UIViewController {
         }
     }
     
-    func setupBottomTools() {
-        view.addSubview(exampleControlView)
-        exampleControlView.snp.makeConstraints { make in
-            make.left.right.equalToSuperview()
-            make.top.equalTo(fastRoom.view.snp.bottom)
-            if #available(iOS 11.0, *) {
-                make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-            } else {
-                make.bottom.equalToSuperview()
-            }
-        }
-    }
-    
     func reloadFastboard(overlay: FastRoomOverlay? = nil) {
         fastRoom.view.removeFromSuperview()
-        exampleControlView.removeFromSuperview()
         setupFastboard(custom: overlay)
-        setupBottomTools()
     }
     
     var isHide = false {
         didSet {
             fastRoom.setAllPanel(hide: isHide)
             let str = NSLocalizedString(isHide ? "On" : "Off", comment: "")
-            exampleItems.first(where: { $0.title == NSLocalizedString("Hide PanelItem", comment: "")})?.status = str
         }
     }
     
@@ -241,7 +203,6 @@ class ViewController: UIViewController {
                 let i = self.currentTheme
                 self.currentTheme = i
             }
-            exampleItems.first(where: { $0.title == NSLocalizedString("Update User Theme", comment: "") })?.status = NSLocalizedString(usingCustomTheme ? "On" : "Off", comment: "")
         }
     }
     
@@ -254,7 +215,7 @@ class ViewController: UIViewController {
                 FastRoomDefaultOperationItem.defaultColors = storedColors
             }
             self.reloadFastboard(overlay: nil)
-            exampleItems.first(where: { $0.title == NSLocalizedString("Custom Pencil Colors", comment: "") })?.status = NSLocalizedString(usingCustomPanelItemColor ? "On" : "Off", comment: "")
+        
         }
     }
     
@@ -267,7 +228,7 @@ class ViewController: UIViewController {
                 CompactFastRoomOverlay.defaultCompactAppliance = defaultPhoneItems
             }
             reloadFastboard(overlay: nil)
-            exampleItems.first(where: { $0.title == NSLocalizedString("Update iPhone Items", comment: "") })?.status = NSLocalizedString(usingCustomPhoneItems ? "On" : "Off", comment: "")
+            
         }
     }
     
@@ -288,7 +249,6 @@ class ViewController: UIViewController {
                 RegularFastRoomOverlay.customOperationPanel = defaultPadItems
             }
             reloadFastboard(overlay: nil)
-            exampleItems.first(where: { $0.title == NSLocalizedString("Update Pad Items", comment: "") })?.status = NSLocalizedString(usingCustomPadItems ? "On" : "Off", comment: "")
         }
     }
     
@@ -307,7 +267,6 @@ class ViewController: UIViewController {
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                 self.view.isUserInteractionEnabled = true
             }
-            exampleItems.first(where: { $0.title == NSLocalizedString("Update Custom Icons", comment: "") })?.status = NSLocalizedString(usingCustomIcons ? "On" : "Off", comment: "")
         }
     }
     
@@ -322,7 +281,6 @@ class ViewController: UIViewController {
                 FastRoomControlBar.appearance().itemWidth = 44
                 AppearanceManager.shared.commitUpdate()
             }
-            exampleItems.first(where: { $0.title == NSLocalizedString("Custom Overlay", comment: "")})?.status = NSLocalizedString(usingCustomOverlay ? "On" : "Off", comment: "")
         }
     }
     
@@ -331,149 +289,6 @@ class ViewController: UIViewController {
             fastRoom.view.overlay?.setAllPanel(hide: hideAllPanel)
         }
     }
-    
-    lazy var exampleItems: [ExampleItem] = {
-        var array: [ExampleItem] = [
-            .init(title: NSLocalizedString("Reset", comment: ""), status: nil, clickBlock: { [unowned self] _ in
-                let vc = ViewController()
-                vc.usingCustomTheme = false
-                UIApplication.shared.keyWindow?.rootViewController = vc
-            }),
-            .init(title: NSLocalizedString("Update Default Theme", comment: ""), status: "\(self.currentTheme)", clickBlock: { [unowned self] item in
-                item.status = "\(self.applyNextTheme())"
-            }),
-            .init(title: NSLocalizedString("Update User Theme", comment: ""), status: NSLocalizedString(usingCustomTheme ? "On" : "Off", comment: ""), clickBlock: { [unowned self] _ in
-                self.usingCustomTheme = !self.usingCustomTheme
-            }),
-            .init(title: NSLocalizedString("Custom Pencil Colors", comment: ""), status: NSLocalizedString(usingCustomTheme ? "On" : "Off", comment: ""), clickBlock: { [unowned self] _ in
-                self.usingCustomPanelItemColor = !self.usingCustomPanelItemColor
-            }),
-            .init(title: NSLocalizedString("Update iPhone Items", comment: ""), status: NSLocalizedString(usingCustomPhoneItems ? "On" : "Off", comment: ""), clickBlock: { _ in
-                self.usingCustomPhoneItems = !self.usingCustomPhoneItems
-            }),
-            .init(title: NSLocalizedString("Update Pad Items", comment: ""), status: NSLocalizedString(usingCustomPadItems ? "On" : "Off", comment: ""), clickBlock: { _ in
-                self.usingCustomPadItems = !self.usingCustomPadItems
-            }),
-            .init(title: NSLocalizedString("Update ToolBar Direction", comment: ""), status: NSLocalizedString("Left", comment: ""), clickBlock: { [unowned self] item in
-                if FastRoomView.appearance().operationBarDirection == .left {
-                    FastRoomView.appearance().operationBarDirection = .right
-                    item.status = NSLocalizedString("Right", comment: "")
-                } else {
-                    FastRoomView.appearance().operationBarDirection = .left
-                    item.status = NSLocalizedString("Left", comment: "")
-                }
-                AppearanceManager.shared.commitUpdate()
-            }),
-            .init(title: NSLocalizedString("BarSize", comment: ""), status: "40", clickBlock: { item in
-                if FastRoomControlBar.appearance().itemWidth == 48 {
-                    FastRoomControlBar.appearance().itemWidth = 44
-                } else {
-                    FastRoomControlBar.appearance().itemWidth = 48
-                }
-                item.status = FastRoomControlBar.appearance().itemWidth.description
-                AppearanceManager.shared.commitUpdate()
-            }),
-            .init(title: NSLocalizedString("Update Custom Icons", comment: ""), status: NSLocalizedString(usingCustomIcons ? "On" : "Off", comment: ""), clickBlock: { [unowned self] _ in
-                self.usingCustomIcons = !self.usingCustomIcons
-            }),
-            .init(title: NSLocalizedString("Hide PanelItem", comment: ""), status: NSLocalizedString(isHide ? "On" : "Off", comment: ""), clickBlock: { [unowned self] _ in
-                self.isHide = !self.isHide
-            }),
-            .init(title: NSLocalizedString("Hide Item", comment: ""), status: nil, clickBlock: { [unowned self] _ in
-                let alert = UIAlertController(title: NSLocalizedString("Hide Item", comment: ""), message: "", preferredStyle: .actionSheet)
-                var values: [FastRoomDefaultOperationIdentifier] = []
-                values.append(contentsOf: WhiteApplianceNameKey.allCases.map { .applice(key: $0, shape: nil)})
-                values.append(contentsOf: WhiteApplianceShapeTypeKey.allCases.map { .applice(key: .ApplianceShape, shape: $0) })
-                let others: [FastRoomDefaultOperationIdentifier] = [
-                    .operationType(.clean)!,
-                    .operationType(.previousPage)!,
-                    .operationType(.newPage)!,
-                    .operationType(.nextPage)!,
-                    .operationType(.redo)!,
-                    .operationType(.undo)!
-                ]
-                values.append(contentsOf: others)
-                for key in values {
-                    alert.addAction(.init(title: key.identifier,
-                                          style: .default, handler: { _ in
-                        self.fastRoom.setPanelItemHide(item: key, hide: true)
-                    }))
-                }
-                alert.addAction(.init(title: "cancel", style: .cancel, handler: nil))
-                alert.popoverPresentationController?.sourceView = self.exampleControlView
-                self.present(alert, animated: true, completion: nil)
-            }),
-            .init(title: NSLocalizedString("Update writable", comment: ""), status: NSLocalizedString("On", comment: ""), clickBlock: { [unowned self] item in
-                guard let room = self.fastRoom.room else { return }
-                let writable = !room.isWritable
-                self.fastRoom.updateWritable(writable) { error in
-                    if let error = error {
-                        print(error)
-                        return
-                    }
-                }
-                item.status = NSLocalizedString(writable ? "On" : "Off", comment: "")
-            }),
-            .init(title: NSLocalizedString("Custom Overlay", comment: ""), status: NSLocalizedString("Off", comment: ""), clickBlock: { [unowned self] _ in
-                self.usingCustomOverlay = !self.usingCustomOverlay
-            }),
-            .init(title: NSLocalizedString("Apple Pencil", comment: ""), status: NSLocalizedString(FastRoom.followSystemPencilBehavior ? "On" : "Off", comment: ""), clickBlock: { [unowned self] item in
-                FastRoom.followSystemPencilBehavior = !FastRoom.followSystemPencilBehavior
-                item.status =
-                NSLocalizedString(FastRoom.followSystemPencilBehavior ? "On" : "Off", comment: "")
-            }),
-            .init(title: NSLocalizedString("Update Layout", comment: ""), status: nil, clickBlock: { [unowned self] _ in
-                self.fastRoom.view.overlay?.invalidAllLayout()
-                if let regular = self.fastRoom.view.overlay as? RegularFastRoomOverlay {
-                    regular.operationPanel.view?.snp.makeConstraints { make in
-                        make.left.equalToSuperview()
-                        make.centerY.equalToSuperview()
-                    }
-                    
-                    regular.deleteSelectionPanel.view?.snp.makeConstraints({ make in
-                        make.bottom.equalTo(regular.operationPanel.view!.snp.top).offset(-8)
-                        make.left.equalToSuperview()
-                    })
-                    
-                    regular.undoRedoPanel.view?.snp.makeConstraints({ make in
-                        make.left.bottom.equalTo(self.fastRoom.view.whiteboardView)
-                    })
-                    
-                    regular.scenePanel.view?.snp.makeConstraints({ make in
-                        make.bottom.equalTo(self.fastRoom.view.whiteboardView)
-                        make.centerX.equalToSuperview()
-                    })
-                }
-                
-                if let compact = self.fastRoom.view.overlay as? CompactFastRoomOverlay {
-                    compact.operationPanel.view?.snp.makeConstraints({ make in
-                        make.left.equalTo(self.fastRoom.view.whiteboardView)
-                        make.centerY.equalToSuperview()
-                    })
-                    
-                    compact.colorAndStrokePanel.view?.snp.makeConstraints({ make in
-                        make.left.equalTo(self.fastRoom.view.whiteboardView)
-                        make.bottom.equalTo(compact.operationPanel.view!.snp.top).offset(-8)
-                    })
-                    
-                    compact.deleteSelectionPanel.view?.snp.makeConstraints { $0.edges.equalTo(compact.colorAndStrokePanel.view!) }
-                    
-                    compact.undoRedoPanel.view?.snp.makeConstraints({ make in
-                        make.left.bottom.equalTo(self.fastRoom.view.whiteboardView)
-                    })
-                    
-                    compact.scenePanel.view?.snp.makeConstraints({ make in
-                        make.bottom.centerX.equalTo(self.fastRoom.view.whiteboardView)
-                    })
-                }
-            }),
-            .init(title: NSLocalizedString("Hide All Panel", comment: ""), status: NSLocalizedString(self.hideAllPanel ? "On" : "Off", comment: ""), enable: true, clickBlock: { [unowned self] item in
-                self.hideAllPanel = !self.hideAllPanel
-                item.status = NSLocalizedString(self.hideAllPanel ? "On" : "Off", comment: "")
-            })
-        ]
-        return array
-    }()
     
     func insertItem(_ item: StorageItem) {
         if item.fileType == .img {
@@ -526,8 +341,6 @@ class ViewController: UIViewController {
         }
     }
     
-    // MARK: Lazy
-    lazy var exampleControlView = ExampleControlView(items: exampleItems)
     
     lazy var mediaControlView = ExampleControlView(items: [
         .init(title: NSLocalizedString("Insert Mock PPTX", comment: ""), status: nil, clickBlock: { [unowned self] _ in

@@ -87,7 +87,7 @@ class SubPanelView: UIView {
             } else {
                 leftAnchor.constraint(equalTo: exceptView.rightAnchor).isActive = true
             }
-            centerYAnchor.constraint(equalTo: exceptView.centerYAnchor).isActive = true
+            topAnchor.constraint(equalTo: exceptView.centerYAnchor, constant: (frame.height / 2) - 30).isActive = true
         }
     }
     
