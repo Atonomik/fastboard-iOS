@@ -353,8 +353,7 @@ extension CompactFastRoomOverlay {
     func createScenesPanel() -> FastRoomPanel {
         let ops = [FastRoomDefaultOperationItem.previousPageItem(),
                    FastRoomDefaultOperationItem.pageIndicatorItem(),
-                   FastRoomDefaultOperationItem.nextPageItem(),
-                   FastRoomDefaultOperationItem.newPageItem()]
+                   FastRoomDefaultOperationItem.nextPageItem()]
         let panel = FastRoomPanel(items: ops)
         panel.delegate = self
         return panel
