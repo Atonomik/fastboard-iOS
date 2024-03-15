@@ -53,7 +53,7 @@ class ViewController: UIViewController {
     }
     
     func setupViews() {
-        view.backgroundColor = .gray
+        view.backgroundColor = .white
         setupFastboard()
         setupBottomTools()
         setupMediaTools()
