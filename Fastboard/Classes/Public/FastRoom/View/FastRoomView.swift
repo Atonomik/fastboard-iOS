@@ -33,7 +33,6 @@ public class FastRoomView: UIView, FastPanelControl {
     @objc
     public init(overlay: FastRoomOverlay?) {
         self.overlay = overlay
-        backgroundColor = .white
         super.init(frame: .zero)
         setupWhiteboardView()
     }
@@ -61,6 +60,7 @@ public class FastRoomView: UIView, FastPanelControl {
     public var whiteboardView: WhiteBoardView!
     
      func setupWhiteboardView() {
+        backgroundColor = .white
         whiteboardView = WhiteBoardView()
         whiteboardView.frame = self.bounds
          whiteboardView.translatesAutoresizingMaskIntoConstraints = false
