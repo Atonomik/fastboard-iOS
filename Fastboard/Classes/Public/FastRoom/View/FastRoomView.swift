@@ -62,15 +62,7 @@ public class FastRoomView: UIView, FastPanelControl {
      func setupWhiteboardView() {
         backgroundColor = .white
         whiteboardView = WhiteBoardView()
-        whiteboardView.frame = self.bounds
-         whiteboardView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(whiteboardView)
-        if #available(iOS 11.0, *) {
-            whiteboardView.trailingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.trailingAnchor).isActive = true
-            whiteboardView.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor).isActive = true
-        }
-        whiteboardView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-        whiteboardView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -5).isActive = true
      }
     
     @objc
