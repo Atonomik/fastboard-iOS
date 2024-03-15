@@ -33,6 +33,7 @@ public class FastRoomView: UIView, FastPanelControl {
     @objc
     public init(overlay: FastRoomOverlay?) {
         self.overlay = overlay
+        backgroundColor = .white
         super.init(frame: .zero)
         setupWhiteboardView()
     }
@@ -48,10 +49,11 @@ public class FastRoomView: UIView, FastPanelControl {
         var height = width / Fastboard.globalFastboardRatio
         if height > bounds.height {
             height = bounds.height
-            width = (Fastboard.globalFastboardRatio * height) + 30
+            width = Fastboard.globalFastboardRatio * height
         }
         let x = (bounds.width - width) / 2
         let y = (bounds.height - height) / 2
+        backgroundColor = .white
         whiteboardView.frame = .init(x: x, y: y, width: width, height: height)
     }
     
