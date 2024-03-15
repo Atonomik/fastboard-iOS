@@ -68,6 +68,7 @@ public class FastRoomView: UIView, FastPanelControl {
         }
         whiteboardView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
         whiteboardView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -5).isActive = true
+     }
     
     @objc
     public func setAllPanel(hide: Bool) {
